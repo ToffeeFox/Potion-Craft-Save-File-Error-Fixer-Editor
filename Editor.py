@@ -4,30 +4,49 @@ import os
 import sys
 from datetime import datetime
 
-xor_key = "a^19uh%47x71e%sd"
+XOR_KEY = "a^19uh%47x71e%sd"
+
+# Main function for doing XOR operations on the save data
 def xor_crypt(data, key):
-    encrypted = bytearray()
+    """
+    `data`: The data to XOR
+    `key`: the XOR key to use
+    """
+
+    result = bytearray()
     key_length = len(key)
+
     for i, byte in enumerate(data):
-        encrypted.append(byte ^ ord(key[i % key_length]))
-    return bytes(encrypted)
+        result.append(byte ^ ord(key[i % key_length]))
+
+    return bytes(result)
 
 
-def get_nested_value(data, path):
-    keys = path.split('.')
-    for key in keys:
-        if isinstance(data, dict):
-            data = data.get(key)
+def get_nested_value(json_data, keypath):
+    """
+    Retrieve the value of a nested JSON key
+    located at `keypath` of `json_data`
+    """
+    
+    keys = keypath.split('.') # Split JSON key by period chars
+    # for example config.someKey becomes ['config', 'someKey']
+
+    for key in keys: # Traverse the JSON key structure
+        if isinstance(json_data, dict): # If this JSON data has keys...
+            json_data = json_data.get(key) # Retrieve the value of the key, if any.
+            # For example, the 'config' key has a value; a key named 'someKey'. This means that
+            # next time this loop runs, we will be checking the value of 'someKey', and so on,
+            # until we reach the point where all we have left is the value of innermost key.
         else:
-            return None
-    return data
+            return None # JSON data has no keys (we reached the end of the keypath)
+    return json_data # Return the innermost key's value (if any)
 
 
-def set_nested_value(data, path, value):
-    keys = path.split('.')
+def set_nested_value(json_data, keypath, value):
+    keys = keypath.split('.') # Split JSON keypath by period chars
     for key in keys[:-1]:
-        if key not in data:
-            data[key] = {}
+        if key not in json_data: # If key does not exist in the data structure...
+            data[key] = {} # initialize the key with an empty value (the equivalent of doing `someKey: {}`)
         data = data[key]
     data[keys[-1]] = value
 
@@ -44,11 +63,11 @@ def process_save_file(file_path):
 
     # 处理两段内容
     decoded_content1 = base64.b64decode(base64_content1)
-    decrypted_content1 = xor_crypt(decoded_content1, xor_key)
+    decrypted_content1 = xor_crypt(decoded_content1, XOR_KEY)
     json_content1 = json.loads(decrypted_content1.decode('utf-8'))
 
     decoded_content2 = base64.b64decode(base64_content2)
-    decrypted_content2 = xor_crypt(decoded_content2, xor_key)
+    decrypted_content2 = xor_crypt(decoded_content2, XOR_KEY)
     json_content2 = json.loads(decrypted_content2.decode('utf-8'))
 
     return json_content1, json_content2, base64_content1, base64_content2
@@ -72,8 +91,8 @@ def save_modified_content(file_path, json_content1, json_content2):
 
 
     # 重新加密内容
-    encrypted_content1 = xor_crypt(json.dumps(json_content1, separators=(',', ':')).encode('utf-8'), xor_key)
-    encrypted_content2 = xor_crypt(json.dumps(json_content2, separators=(',', ':')).encode('utf-8'), xor_key)
+    encrypted_content1 = xor_crypt(json.dumps(json_content1, separators=(',', ':')).encode('utf-8'), XOR_KEY)
+    encrypted_content2 = xor_crypt(json.dumps(json_content2, separators=(',', ':')).encode('utf-8'), XOR_KEY)
 
     base64_content1 = base64.b64encode(encrypted_content1).decode('utf-8')
     base64_content2 = base64.b64encode(encrypted_content2).decode('utf-8')
@@ -283,8 +302,8 @@ def encode_and_save(json_file_path):
         json_content2 = combined_json["content2"]
 
         # 重新加密内容
-        encrypted_content1 = xor_crypt(json.dumps(json_content1, separators=(',', ':')).encode('utf-8'), xor_key)
-        encrypted_content2 = xor_crypt(json.dumps(json_content2, separators=(',', ':')).encode('utf-8'), xor_key)
+        encrypted_content1 = xor_crypt(json.dumps(json_content1, separators=(',', ':')).encode('utf-8'), XOR_KEY)
+        encrypted_content2 = xor_crypt(json.dumps(json_content2, separators=(',', ':')).encode('utf-8'), XOR_KEY)
 
         base64_content1 = base64.b64encode(encrypted_content1).decode('utf-8')
         base64_content2 = base64.b64encode(encrypted_content2).decode('utf-8')
