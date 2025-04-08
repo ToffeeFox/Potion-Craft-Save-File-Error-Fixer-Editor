@@ -10,6 +10,7 @@ XOR_KEY = "a^19uh%47x71e%sd"
 def xor_crypt(data, key):
     """
     `data`: The data to XOR
+
     `key`: the XOR key to use
     """
 
@@ -26,8 +27,9 @@ def get_nested_value(json_data, keypath):
     """
     Retrieve the value of a nested JSON key
     located at `keypath` of `json_data`
+    (if it exists)
     """
-    
+
     keys = keypath.split('.') # Split JSON key by period chars
     # for example config.someKey becomes ['config', 'someKey']
 
@@ -43,6 +45,10 @@ def get_nested_value(json_data, keypath):
 
 
 def set_nested_value(json_data, keypath, value):
+    """
+    Set the `value` of a nested JSON key located at `keypath`,
+    recursively creating parent keys as needed.
+    """
     keys = keypath.split('.') # Split JSON keypath by period chars
     for key in keys[:-1]:
         if key not in json_data: # If key does not exist in the data structure...
@@ -335,6 +341,8 @@ if __name__ == "__main__":
     input()
 
 
+#! This should be adjusted to either be included in README.md
+#! or displayed to the end-user via the program if necessary.
 """我靠，那个坏档，我终于是有点头绪了。
 
 有这些BuildZone，用来放家具的东西：
