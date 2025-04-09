@@ -68,6 +68,7 @@ def process_save_file(file_path):
 
 
     # 处理两段内容
+    # Process both lines
     decoded_content1 = base64.b64decode(base64_content1)
     decrypted_content1 = xor_crypt(decoded_content1, XOR_KEY)
     json_content1 = json.loads(decrypted_content1.decode('utf-8'))
@@ -83,6 +84,7 @@ def save_modified_content(file_path, json_content1, json_content2):
 
 
     # 创建备份
+    # Create a backup
     backup_time = datetime.now().strftime("%Y%m%d%H%M%S")
     file_name = os.path.basename(file_path)
     file_name_without_ext = os.path.splitext(file_name)[0]
@@ -90,6 +92,7 @@ def save_modified_content(file_path, json_content1, json_content2):
     backup_path = os.path.join(os.getcwd(), backup_file_name)
 
     # 复制原文件作为备份
+    # Copy the original file as a backup
     import shutil
     shutil.copy2(file_path, backup_path)
 
@@ -97,6 +100,7 @@ def save_modified_content(file_path, json_content1, json_content2):
 
 
     # 重新加密内容
+    # Re-encrypt data
     encrypted_content1 = xor_crypt(json.dumps(json_content1, separators=(',', ':')).encode('utf-8'), XOR_KEY)
     encrypted_content2 = xor_crypt(json.dumps(json_content2, separators=(',', ':')).encode('utf-8'), XOR_KEY)
 
@@ -142,12 +146,15 @@ def main():
             path, value = parts
             try:
                 # 尝试将值转换为数字或布尔值，如果失败则保持为字符串
+                # Try to convert value to number or boolean
+                # If this fails, keep it as a string
                 try:
                     value = json.loads(value)
                 except json.JSONDecodeError:
                     pass  # 保持为字符串
 
                 # 确定修改哪一部分内容
+                # Determine which part of the content to modify
                 if get_nested_value(json_content1, path) is not None:
                     set_nested_value(json_content1, path, value)
                     print(f"已修改第一段内容: {path} = {value} (Modified first section content: {path} = {value})")
@@ -160,6 +167,7 @@ def main():
                 print(f"修改失败: {str(e)} (Modification failed: {str(e)})")
 
         # 保存修改后的内容
+        # Save the modified content
         save_modified_content(file_path, json_content1, json_content2)
         print("修改已保存。(Modifications saved.)")
 
@@ -341,8 +349,6 @@ if __name__ == "__main__":
     input()
 
 
-#! This should be adjusted to either be included in README.md
-#! or displayed to the end-user via the program if necessary.
 """我靠，那个坏档，我终于是有点头绪了。
 
 有这些BuildZone，用来放家具的东西：
